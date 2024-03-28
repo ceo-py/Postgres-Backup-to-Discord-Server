@@ -1,0 +1,9 @@
+[Unit]
+Description=DB Backup
+
+[Service]
+Type=oneshot
+ExecStart="Add python path" "and add path to the script"
+
+[Install]
+WantedBy=multi-user.target

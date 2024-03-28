@@ -1,0 +1,9 @@
+[Unit]
+Description=Runs db-backup every day at night
+
+[Timer]
+OnCalendar=*-*-* 23:00:00 "The time it runs the script"
+Persistent=true
+
+[Install]
+WantedBy=timers.target
