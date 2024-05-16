@@ -16,7 +16,7 @@ WEBHOOK_URL = 'Discord Webhook link'
 os.environ['PGPASSWORD'] = DB_PASSWORD
 
 
-def rename_files_in_current_directory(new_names):
+def rename_files_in_current_directory(new_names: str) -> None:
     directory_path = os.getcwd()
 
     files = os.listdir(directory_path)
@@ -32,7 +32,7 @@ def rename_files_in_current_directory(new_names):
         os.rename(old_path, new_path)
 
 
-def checksum_files(backup_file, old_backup_file):
+def checksum_files(backup_file: str, old_backup_file: str) -> None:
     backup_checksum = hashlib.md5(
         open(backup_file, 'rb').read()).hexdigest()
     try:
@@ -44,7 +44,7 @@ def checksum_files(backup_file, old_backup_file):
     return backup_checksum == old_backup_checksum
 
 
-def send_file_to_discord_webhook(webhook_url, file_path, message):
+def send_file_to_discord_webhook(webhook_url: str, file_path: str, message: str) -> None:
     data = {
         'content': message
     }
@@ -58,7 +58,7 @@ def send_file_to_discord_webhook(webhook_url, file_path, message):
             print(f"Failed to send backup {message} to Discord. Status code:", response.status_code)
 
 
-def check_db_for_backup():
+def check_db_for_backup() -> None:
     files_to_rename = []
     for db_name in db_base_names:
         backup_file = f'{db_name}__.sql'
