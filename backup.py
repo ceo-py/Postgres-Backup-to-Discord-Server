@@ -13,6 +13,11 @@ DB_USER = "username"
 DB_PASSWORD = "user password"
 WEBHOOK_URL = 'Discord Webhook link'
 
+'''
+for restoring
+psql -h localhost -p 5432 -U DB_USER -d DB_NAME -f BACKUP.sql
+'''
+
 os.environ['PGPASSWORD'] = DB_PASSWORD
 
 

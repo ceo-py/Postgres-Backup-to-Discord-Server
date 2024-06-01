@@ -14,6 +14,11 @@ DB_PASSWORD = "****"
 WEBHOOK_URL = 'discord web hook address'
 OUTPUT_ZIP = "file_name.zip"
 
+'''
+for restoring
+psql -h localhost -p 5432 -U DB_USER -d DB_NAME -f BACKUP.sql
+'''
+
 os.environ['PGPASSWORD'] = DB_PASSWORD
 
 
