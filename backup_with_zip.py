@@ -29,7 +29,7 @@ def rename_files_in_current_directory(new_names: str) -> None:
 
     for file_name in files:
         # the name of the script to skip
-        if file_name == 'backup.py':
+        if ".py" in file_name:
             continue
 
         new_name = file_name.replace('__', '_old')
