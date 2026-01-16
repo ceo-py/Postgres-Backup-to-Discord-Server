@@ -29,12 +29,11 @@ File Merging (Unix):
 os.environ['PGPASSWORD'] = DB_PASSWORD
 
 
-def rename_files_in_current_directory(new_names: str) -> None:
+def rename_files_in_current_directory() -> None:
     directory_path = os.getcwd()
     files = os.listdir(directory_path)
 
     for file_name in files:
-        # the name of the script to skip
         if ".py" in file_name:
             continue
 
@@ -56,21 +55,21 @@ def checksum_files(backup_file: str, old_backup_file: str) -> bool:
     return backup_checksum == old_backup_checksum
 
 
-def send_initial_discord_mesage(webhook_url: str, message: str) -> None:
+def send_initial_discord_message(webhook_url: str, message: str) -> None:
     data = {
         'content': message
     }
     requests.post(webhook_url, data=data)
 
 
-def zip_file(file_name, output_zip):
-    """Zip the original file into a single zip archive."""
+def zip_file(file_name: str, output_zip: str) -> None:
+    """Zip the original file into a parts zip archives."""
     command = ['zip', '-s', MAX_PART_SIZE, output_zip, file_name]
     subprocess.run(command, check=True)
     print(f"Zip file {output_zip} created successfully.")
 
 
-def send_file(file_path, webhook_url):
+def send_file(file_path: str, webhook_url: str) -> None:
     """Send the file to the Discord webhook."""
     with open(file_path, 'rb') as file:
         files = {'file': (os.path.basename(file_path), file)}
@@ -83,7 +82,7 @@ def send_file(file_path, webhook_url):
             print(f"Failed to send {file_path}. Status code: {response.status_code}")
 
 
-def create_zip_and_split(file_name, webhook_url, output_zip_prefix):
+def create_zip_and_split(file_name: str, webhook_url: str, output_zip_prefix: str) -> None:
     """Create a zip of the file, split it into parts, and send each part to Discord."""
     output_zip = f"{output_zip_prefix}.zip"
     zip_file(file_name, output_zip)
@@ -92,6 +91,7 @@ def create_zip_and_split(file_name, webhook_url, output_zip_prefix):
     files = os.listdir(directory_path)
 
     for file_name in files:
+        # skip non zip parts
         if ".z" not in file_name:
             continue
 
@@ -112,7 +112,7 @@ def check_db_for_backup() -> None:
 
         files_to_rename.append(backup_file)
         message = f'Backup of **{db_name}** changed on {datetime.datetime.now().replace(microsecond=0)}'
-        send_initial_discord_mesage(WEBHOOK_URL, message)
+        send_initial_discord_message(WEBHOOK_URL, message)
         create_zip_and_split(backup_file, WEBHOOK_URL, db_name)
     if files_to_rename:
         rename_files_in_current_directory(files_to_rename)
