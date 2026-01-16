@@ -13,11 +13,17 @@ DB_USER = "USERNAME"
 DB_PASSWORD = "PASSWORD"
 WEBHOOK_URL = "WEBHOOK URL"
 OUTPUT_ZIP = "NAME OF THE ZIP FILE"
-MAX_PART_SIZE = 9 * 1024 * 1024  # 9MB in bytes
+MAX_PART_SIZE = "9m"  # 9MB in bytes
 
 '''
-for restoring
-psql -h localhost -p 5432 -U DB_USER -d DB_NAME -f BACKUP.sql
+Backup Restore:
+  psql -h localhost -p 5432 -U DB_USER -d DB_NAME -f BACKUP.sql
+
+File Zipping:
+  zip -s 9m new.zip <file_name>
+
+File Merging (Unix):
+  cat new.z*[0-9]* new.zip > existing.zip
 '''
 
 os.environ['PGPASSWORD'] = DB_PASSWORD
@@ -25,7 +31,6 @@ os.environ['PGPASSWORD'] = DB_PASSWORD
 
 def rename_files_in_current_directory(new_names: str) -> None:
     directory_path = os.getcwd()
-
     files = os.listdir(directory_path)
 
     for file_name in files:
@@ -60,26 +65,9 @@ def send_initial_discord_mesage(webhook_url: str, message: str) -> None:
 
 def zip_file(file_name, output_zip):
     """Zip the original file into a single zip archive."""
-    command = ['zip', '-r', output_zip, file_name]
+    command = ['zip', '-s', MAX_PART_SIZE, output_zip, file_name]
     subprocess.run(command, check=True)
     print(f"Zip file {output_zip} created successfully.")
-
-
-def split_file(file_name):
-    file_size = os.path.getsize(file_name)
-    num_parts = (file_size // MAX_PART_SIZE) + 1  # Determine number of parts
-    file_name_no_zip = file_name.replace(".zip", "")
-    parts = []
-    with open(file_name, 'rb') as file:
-        for i in range(num_parts):
-            part_name = f"{file_name_no_zip}_part{i + 1}.zip"
-            with open(part_name, 'wb') as part_file:
-                chunk = file.read(MAX_PART_SIZE)
-                part_file.write(chunk)
-                parts.append(part_name)
-            print(f"Created part: {part_name}")
-
-    return parts
 
 
 def send_file(file_path, webhook_url):
@@ -97,17 +85,17 @@ def send_file(file_path, webhook_url):
 
 def create_zip_and_split(file_name, webhook_url, output_zip_prefix):
     """Create a zip of the file, split it into parts, and send each part to Discord."""
-    # Step 1: Zip the original file into one zip file
     output_zip = f"{output_zip_prefix}.zip"
     zip_file(file_name, output_zip)
 
-    # Step 2: Split the zip file into smaller parts (max 10MB each)
-    parts = split_file(output_zip)
+    directory_path = os.getcwd()
+    files = os.listdir(directory_path)
 
-    # Step 3: Send each part to Discord
-    for idx, part in enumerate(parts):
-        send_file(part, webhook_url)
-    os.remove(output_zip)  # Clean up the original zip file
+    for file_name in files:
+        if ".z" not in file_name:
+            continue
+
+        send_file(file_name, webhook_url)
 
 
 def check_db_for_backup() -> None:
